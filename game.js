@@ -3,6 +3,7 @@ const config = {
   width: 800,
   height: 400,
   backgroundColor: '#d8d2c6',
+  parent: 'gameCanvas',
   physics: {
     default: 'arcade',
     arcade: { gravity: { y: 500 }, debug: false }
