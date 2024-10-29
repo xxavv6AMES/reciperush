@@ -6,6 +6,10 @@ let chef = { x: 50, y: 300, width: 50, height: 50, vy: 0, onGround: false };
 let groundX = 0;
 let stats = { money: 1000, customers: 50 };
 
+// Load the ground texture
+const groundImage = new Image();
+groundImage.src = 'rsrc/images/mground.png'; // Replace 'path/to/ground.png' with the actual file path of your ground texture
+
 // Main game loop
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -19,11 +23,17 @@ function gameLoop() {
 
 // Game scene (running path)
 function drawGameScene() {
-  // Draw ground
-  ctx.fillStyle = "#3b3a3a";
-  ctx.fillRect(groundX, canvas.height - 50, canvas.width * 2, 50);
-  groundX -= 2;
-  if (groundX <= -canvas.width) groundX = 0;
+  // Draw ground texture
+  if (groundImage.complete) { // Check if the image is fully loaded before drawing
+    ctx.drawImage(groundImage, groundX, canvas.height - 50, canvas.width * 2, 50);
+    ctx.drawImage(groundImage, groundX + canvas.width * 2, canvas.height - 50, canvas.width * 2, 50); // Repeating for scrolling effect
+    groundX -= 2;
+    if (groundX <= -canvas.width) groundX = 0;
+  } else {
+    // Fallback if the ground image is not loaded
+    ctx.fillStyle = "#3b3a3a";
+    ctx.fillRect(groundX, canvas.height - 50, canvas.width * 2, 50);
+  }
 
   // Draw chef
   ctx.fillStyle = "#ffbd06";
