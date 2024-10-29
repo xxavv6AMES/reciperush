@@ -1,92 +1,77 @@
-// Configuration for Phaser Game
-const config = {
-  type: Phaser.AUTO,
-  width: 800,
-  height: 400,
-  backgroundColor: '#d8d2c6',
-  parent: 'gameCanvas', // Automatically places the canvas inside this div
-  physics: {
-    default: 'arcade',
-    arcade: { gravity: { y: 500 }, debug: false }
-  },
-  scene: [GameScene, RestaurantScene] // Adds both scenes to Phaser's Scene Manager
-};
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
 
-// Initialize Phaser Game
-const game = new Phaser.Game(config);
+let currentScene = "game"; // Toggle between 'game' and 'restaurant'
+let chef = { x: 50, y: 300, width: 50, height: 50, vy: 0, onGround: false };
+let groundX = 0;
+let stats = { money: 1000, customers: 50 };
 
-// Game Scene - Running Path
-class GameScene extends Phaser.Scene {
-  constructor() {
-    super({ key: 'GameScene' });
+// Main game loop
+function gameLoop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (currentScene === "game") {
+    drawGameScene();
+  } else if (currentScene === "restaurant") {
+    drawRestaurantScene();
   }
-
-  preload() {
-    // Load assets for the game scene
-    this.load.image('ground', 'ground.png'); // Placeholder ground image
-    this.load.image('chef', 'chef.png');     // Placeholder chef image
-  }
-
-  create() {
-    // Set up scrolling ground as a tile sprite
-    this.ground = this.add.tileSprite(400, 375, 800, 50, 'ground');
-    this.ground.setOrigin(0.5, 0.5);
-
-    // Chef character with physics and bound constraints
-    this.chef = this.physics.add.sprite(50, 300, 'chef').setScale(0.5);
-    this.chef.setCollideWorldBounds(true);
-
-    // Set up jump mechanic
-    this.input.keyboard.on('keydown-SPACE', () => {
-      if (this.chef.body.touching.down) {
-        this.chef.setVelocityY(-300); // Jump power
-      }
-    });
-
-    // Button to switch to the restaurant screen
-    this.createButton('Go to Restaurant', 650, 10, () => {
-      this.scene.start('RestaurantScene');
-    });
-  }
-
-  update() {
-    // Scroll the ground to create a running path effect
-    this.ground.tilePositionX += 2;
-  }
-
-  // Helper to create button text elements
-  createButton(text, x, y, callback) {
-    const button = this.add.text(x, y, text, { font: '16px Arial', fill: '#ffbd06' });
-    button.setInteractive();
-    button.on('pointerdown', callback);
-  }
+  requestAnimationFrame(gameLoop);
 }
 
-// Restaurant Scene
-class RestaurantScene extends Phaser.Scene {
-  constructor() {
-    super({ key: 'RestaurantScene' });
+// Game scene (running path)
+function drawGameScene() {
+  // Draw ground
+  ctx.fillStyle = "#3b3a3a";
+  ctx.fillRect(groundX, canvas.height - 50, canvas.width * 2, 50);
+  groundX -= 2;
+  if (groundX <= -canvas.width) groundX = 0;
+
+  // Draw chef
+  ctx.fillStyle = "#ffbd06";
+  ctx.fillRect(chef.x, chef.y, chef.width, chef.height);
+
+  // Apply gravity and jump physics
+  chef.vy += 1;
+  chef.y += chef.vy;
+  if (chef.y + chef.height >= canvas.height - 50) {
+    chef.y = canvas.height - 50 - chef.height;
+    chef.vy = 0;
+    chef.onGround = true;
   }
 
-  create() {
-    // Background setup for restaurant
-    this.add.rectangle(400, 200, 800, 400, 0xd8d2c6);
-
-    // Display restaurant title and stats
-    this.add.text(300, 50, 'Your Restaurant', { font: '32px Arial', fill: '#3b3a3a' });
-    this.add.text(50, 100, 'Money: $1000', { font: '20px Arial', fill: '#3b3a3a' });
-    this.add.text(50, 130, 'Customers Served: 50', { font: '20px Arial', fill: '#3b3a3a' });
-
-    // Button to return to the game screen
-    this.createButton('Back to Game', 650, 10, () => {
-      this.scene.start('GameScene');
-    });
-  }
-
-  // Helper to create button text elements
-  createButton(text, x, y, callback) {
-    const button = this.add.text(x, y, text, { font: '16px Arial', fill: '#ffbd06' });
-    button.setInteractive();
-    button.on('pointerdown', callback);
-  }
+  // Display 'Go to Restaurant' button
+  document.getElementById("toggleScene").innerText = "Go to Restaurant";
 }
+
+// Restaurant scene (idle management)
+function drawRestaurantScene() {
+  // Restaurant background
+  ctx.fillStyle = "#d8d2c6";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Restaurant title and stats
+  ctx.fillStyle = "#3b3a3a";
+  ctx.font = "32px Arial";
+  ctx.fillText("Your Restaurant", 300, 50);
+  ctx.font = "20px Arial";
+  ctx.fillText(`Money: $${stats.money}`, 50, 100);
+  ctx.fillText(`Customers Served: ${stats.customers}`, 50, 130);
+
+  // Display 'Back to Game' button
+  document.getElementById("toggleScene").innerText = "Back to Game";
+}
+
+// Toggle between game and restaurant scenes
+function toggleScene() {
+  currentScene = currentScene === "game" ? "restaurant" : "game";
+}
+
+// Jump action
+window.addEventListener("keydown", (e) => {
+  if (e.code === "Space" && chef.onGround) {
+    chef.vy = -15; // Jump power
+    chef.onGround = false;
+  }
+});
+
+// Start game loop
+gameLoop();
