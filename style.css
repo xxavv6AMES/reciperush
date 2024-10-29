@@ -1,19 +1,18 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: #e5e5e5;
-  overflow: hidden;
+#gameContainer {
+  text-align: center;
 }
 
 #gameCanvas {
-  background-color: #87CEEB;
-  border: 2px solid #333;
+  background-color: #d8d2c6;
+  border: 2px solid #3b3a3a;
+}
+
+#toggleScene {
+  margin-top: 10px;
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #ffbd06;
+  border: none;
+  color: #3b3a3a;
 }
